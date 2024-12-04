@@ -4,21 +4,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-[RequireComponent(typeof(SpriteRenderer), typeof(Animator), typeof(Rigidbody2D))]
+[RequireComponent(typeof(SpriteRenderer), typeof(AnimatorService), typeof(Rigidbody2D))]
 public class Move : MonoBehaviour
 {
     [SerializeField] private float _speed;
+    [SerializeField] private InputService _inputService;
 
     private Rigidbody2D _rigidbody;
     private SpriteRenderer _spriteRenderer;
-    private Animator _animator;
+    private AnimatorService _animatorService;
 
 
     private void Start()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
-        _animator = GetComponent<Animator>();
+        _animatorService = GetComponent<AnimatorService>();
     }
 
     void Update()
@@ -28,7 +29,7 @@ public class Move : MonoBehaviour
 
     private void HandleMove()
     {
-        float moveInput = Input.GetAxis("Horizontal");
+        float moveInput = _inputService.GetMoveInput();
         var moveDirection = GetMoveDirection(moveInput);
         _rigidbody.velocity = new Vector2(moveInput * _speed, _rigidbody.velocity.y);
 
@@ -36,16 +37,16 @@ public class Move : MonoBehaviour
         {
             case MovingDirection.Left:
                 _spriteRenderer.flipX = true;
-                _animator.SetBool("IsMoving", true);
+                _animatorService.SetMovingAnimation(true);
                 break;
 
             case MovingDirection.Right:
                 _spriteRenderer.flipX = false;
-                GetComponent<Animator>().SetBool("IsMoving", true);
+                _animatorService.SetMovingAnimation(true);
                 break;
 
             case MovingDirection.Stand:
-                GetComponent<Animator>().SetBool("IsMoving", false);
+                _animatorService.SetMovingAnimation(false);
                 break;
 
             default:

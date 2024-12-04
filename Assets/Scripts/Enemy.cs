@@ -25,8 +25,7 @@ public class Enemy : MonoBehaviour
 
     private void Move()
     {
-        var distance = Vector2.Distance(_targetPosition, transform.position);
-        var isPointReached = distance <= _movingAccuracy;
+        var isPointReached = GetIsEnoughClose(transform.position, _targetPosition, _movingAccuracy);
         var step = _speed * Time.deltaTime;
 
         if (isPointReached)
@@ -43,6 +42,16 @@ public class Enemy : MonoBehaviour
     private void ToggleFlipX()
     {
         _spriteRenderer.flipX = !_spriteRenderer.flipX;
+    }
+
+    private bool GetIsEnoughClose(Vector3 start, Vector3 end, float movingAccuracy)
+    {
+        return GetSqrDistance(start, end) <= movingAccuracy * movingAccuracy;
+    }
+
+    private float GetSqrDistance(Vector3 start, Vector3 end)
+    {
+        return (end - start).sqrMagnitude;
     }
 }
 

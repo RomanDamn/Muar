@@ -6,9 +6,9 @@ using UnityEngine;
 public class Jump : MonoBehaviour
 {
     [SerializeField] private LayerMask _platformMask;
+    [SerializeField] private InputService _inputService;
     [SerializeField] private float _velocityByY = 4.2f;
 
-    private KeyCode _jumpKeyCode = KeyCode.Space;
     private BoxCollider2D _collider;
     private Rigidbody2D _rigidbody;
 
@@ -25,7 +25,7 @@ public class Jump : MonoBehaviour
 
     private void HandleJump()
     {
-        if (Input.GetKeyDown(_jumpKeyCode) && GetIsGrounded() == true)
+        if (_inputService.GetIsJump() && GetIsGrounded() == true)
         {
             _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _velocityByY);
         }
