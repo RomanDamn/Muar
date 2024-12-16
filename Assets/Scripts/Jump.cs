@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D), typeof(Rigidbody2D))]
@@ -12,7 +10,7 @@ public class Jump : MonoBehaviour
     private BoxCollider2D _collider;
     private Rigidbody2D _rigidbody;
 
-    private void Start()
+    private void Awake()
     {
         _collider = GetComponent<BoxCollider2D>();
         _rigidbody = GetComponent<Rigidbody2D>();
@@ -25,7 +23,7 @@ public class Jump : MonoBehaviour
 
     private void HandleJump()
     {
-        if (_inputService.GetIsJump() && GetIsGrounded() == true)
+        if (_inputService.GetIsJump() && GetIsGrounded())
         {
             _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _velocityByY);
         }

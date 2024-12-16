@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
@@ -12,7 +10,7 @@ public class Enemy : MonoBehaviour
     private Vector2 _basePosition;
     private SpriteRenderer _spriteRenderer;
 
-    private void Start()
+    private void Awake()
     {
         _basePosition = transform.position;
         _spriteRenderer = GetComponent<SpriteRenderer>();
