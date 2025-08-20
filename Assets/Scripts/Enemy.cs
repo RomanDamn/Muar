@@ -1,15 +1,17 @@
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
-[RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(SpriteRenderer), typeof(HealthController))]
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private float _speed = 1f;
     [SerializeField] private Vector2 _targetPosition;
 
     private float _movingAccuracy = 0.1f;
+    private bool _isFlipped = false;
     private Vector2 _basePosition;
+    private Vector2? _heroPosition;
     private SpriteRenderer _spriteRenderer;
-
     private void Awake()
     {
         _basePosition = transform.position;
@@ -21,17 +23,74 @@ public class Enemy : MonoBehaviour
         Move();
     }
 
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        HealthController heroHealth = collision.gameObject.GetComponent<HealthController>();
+
+        if (heroHealth != null)
+        {
+            heroHealth.TakeDamage();
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Hero hero = collision.GetComponent<Hero>();
+
+        if(hero != null && collision.isTrigger == false)
+        {
+            _heroPosition = collision.transform.position;
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        Hero hero = collision.GetComponent<Hero>();
+
+        if (hero != null && collision.isTrigger == false)
+        {
+            _heroPosition = collision.transform.position;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        Hero hero = collision.GetComponent<Hero>();
+
+        if (hero != null)
+        {
+            if (CheckIsLookToHero() == true)
+            {
+                ToggleFlipX();
+            }
+
+            _heroPosition = null;
+        }
+    }
+
     private void Move()
     {
         var isPointReached = GetIsEnoughClose(transform.position, _targetPosition, _movingAccuracy);
         var step = _speed * Time.deltaTime;
+        var isLookToHero = CheckIsLookToHero() == true;
+
+        if (_heroPosition != null && isLookToHero)
+        {
+            transform.position = Vector2.MoveTowards(transform.position, (Vector2)_heroPosition, step);
+            return;
+        }
 
         if (isPointReached)
         {
             var tempTargetPosition = _targetPosition;
             _targetPosition = _basePosition;
             _basePosition = tempTargetPosition;
-            ToggleFlipX();
+
+            if(CheckIsTargetInOposite())
+            {
+                ToggleFlipX();
+            }
         }
 
         transform.position = Vector2.MoveTowards(transform.position, _targetPosition, step);
@@ -40,6 +99,7 @@ public class Enemy : MonoBehaviour
     private void ToggleFlipX()
     {
         _spriteRenderer.flipX = !_spriteRenderer.flipX;
+        _isFlipped = !_isFlipped;
     }
 
     private bool GetIsEnoughClose(Vector3 start, Vector3 end, float movingAccuracy)
@@ -50,6 +110,29 @@ public class Enemy : MonoBehaviour
     private float GetSqrDistance(Vector3 start, Vector3 end)
     {
         return (end - start).sqrMagnitude;
+    }
+
+    public bool CheckIsLookToHero()
+    {
+        if(_heroPosition == null)
+        {
+            return false;
+        }
+        bool isFacingRight = IsFacingRight();
+        bool playerIsOnRight = _heroPosition.Value.x > transform.position.x;
+        return isFacingRight == playerIsOnRight;
+    }
+
+    public bool CheckIsTargetInOposite()
+    {
+        bool isFacingRight = IsFacingRight();
+        bool targetIsOnRight = _targetPosition.x > _basePosition.x;
+        return isFacingRight != targetIsOnRight;
+    }
+
+    private bool IsFacingRight()
+    {
+        return !_isFlipped;
     }
 }
 
